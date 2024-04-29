@@ -14,8 +14,8 @@
     .hero {
       background-image: url('team-hero-5.webp'); /* Replace 'banner.webp' with your banner photo in webp format */
       background-size: cover;
-      background-position: center;
-      height: 400px; /* Adjust the height of the hero section as needed */
+      background-position: top; /* Adjust the background position to top */
+      height: 500px; /* Adjust the height of the hero section as needed */
       position: relative;
       display: flex;
       justify-content: center;
@@ -36,6 +36,15 @@
     .container {
       position: relative;
       z-index: 1;
+    }
+
+    .logo {
+      position: relative;
+      top: 10px; /* Adjust the top position as needed */
+      left: 50%; /* Align the logo horizontally to the center */
+      transform: translateX(-50%); /* Adjust the position based on logo width */
+      width: 100px; /* Adjust the width of the logo */
+      height: auto; /* Maintain aspect ratio */
     }
 
     input[type="text"],
@@ -70,7 +79,9 @@
 </head>
 <body>
     <div class="hero relative">
+
         <h1 class="text-6xl font-bold text-white absolute top-0 left-0 right-0 text-center" style="margin-top: 20vh;">CPM-Excellence Program Submissions</h1>
+
         <img src="team-hero-5" alt="" class="w-full h-full object-cover filter brightness-50">
       </div>
       
@@ -154,45 +165,73 @@
         const nxtid = formData.get('nxtid');
         const contributions = formData.get('contributions');
         const month = formData.get('month');
-        const tasks = formData.getAll('task[]');
-        const impacts = formData.getAll('impact[]');
-        const sources = formData.getAll('source[]');
   
         // Check if required fields are filled
-        if (!name || !nxtid || !contributions) {
+        if (!name || !nxtid || !contributions || !month) {
           alert('Please fill out all required fields.');
           return;
         }
   
-        // Construct an array of objects where each object represents a row in the Google Sheet
-        const rows = tasks.map((task, index) => ({
-          name: index === 0 ? name : '', // Add name only for the first row
-          nxtid: index === 0 ? nxtid : '', // Add NXTID only for the first row
-          contributions: index === 0 ? contributions : '', // Add contributions only for the first row
-          month: index === 0 ? month : '', // Add month only for the first row
-          task: task,
-          impact: impacts[index],
-          source: sources[index]
-        }));
+        // Construct an array of objects where each object represents the initial submission
+        const initialSubmission = {
+          name: name,
+          nxtid: nxtid,
+          contributions: contributions,
+          month: month
+        };
   
-        // Send a separate request for each task set to add them as new rows
-        Promise.all(rows.map(row =>
-          fetch('https://sheetdb.io/api/v1/j2kgcqdwyi1v8', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ data: row }),
-          })
-        ))
+        // Send initial submission request
+        fetch('https://sheetdb.io/api/v1/j2kgcqdwyi1v8', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ data: initialSubmission }),
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Initial submission request failed');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Initial Submission Success:', data);
+  
+          // Collect additional contributions data
+          const tasks = formData.getAll('task[]');
+          const impacts = formData.getAll('impact[]');
+          const sources = formData.getAll('source[]');
+  
+          // Construct an array of objects for additional contributions
+          const additionalContributions = tasks.map((task, index) => ({
+            name: '', // Empty name field for additional rows
+            nxtid: '', // Empty NXTID field for additional rows
+            contributions: '', // Empty contributions field for additional rows
+            month: '', // Empty month field for additional rows
+            task: task,
+            impact: impacts[index],
+            source: sources[index]
+          }));
+  
+          // Send additional contributions requests
+          return Promise.all(additionalContributions.map(row =>
+            fetch('https://sheetdb.io/api/v1/j2kgcqdwyi1v8', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ data: row }),
+            })
+          ));
+        })
         .then(responses => {
           if (!responses.every(response => response.ok)) {
-            throw new Error('One or more requests failed');
+            throw new Error('One or more additional contributions requests failed');
           }
           return Promise.all(responses.map(response => response.json()));
         })
         .then(data => {
-          console.log('Success:', data);
+          console.log('Additional Contributions Success:', data);
           alert('Data submitted successfully.');
           form.reset();
           additionalFieldsContainer.innerHTML = ''; // Reset additional fields
@@ -204,5 +243,6 @@
       });
     });
   </script>
+
 </body>
 </html>
