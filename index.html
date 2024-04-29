@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Form</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #000; /* Black background color */
+      color: #fff; /* White text color */
+    }
+
+    .hero {
+      background-image: url('team-hero-5.webp'); /* Replace 'banner.webp' with your banner photo in webp format */
+      background-size: cover;
+      background-position: center;
+      height: 400px; /* Adjust the height of the hero section as needed */
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      background-color: #4a5568; /* Dark input background color */
+      color: #cbd5e0; /* Light text color */
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #4299e1; /* Blue focus border color */
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* Blue focus box shadow */
+    }
+
+    .btn {
+      background-color: #e53e3e; /* Crimson red button background color */
+      color: #fff; /* White button text color */
+    }
+
+    .btn:hover {
+      background-color: #c53030; /* Darker crimson red on hover */
+    }
+
+    .btn:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.5); /* Crimson red focus box shadow */
+    }
+  </style>
+</head>
+<body>
+    <div class="hero relative">
+        <h1 class="text-6xl font-bold text-white absolute top-0 left-0 right-0 text-center" style="margin-top: 20vh;">CPM-Excellence Program Submissions</h1>
+        <img src="team-hero-5" alt="" class="w-full h-full object-cover filter brightness-50">
+      </div>
+      
+  <div class="container mx-auto mt-8">
+    <form id="dynamicForm">
+      <div class="mb-4">
+        <label class="block mb-1 text-white">Name:</label>
+        <input type="text" name="name" class="w-full border rounded px-3 py-2">
+      </div>
+      <div class="mb-4">
+        <label class="block mb-1 text-white">NXTID:</label>
+        <input type="text" name="nxtid" class="w-full border rounded px-3 py-2">
+      </div>
+      <div class="mb-4">
+        <label class="block mb-1 text-white">Number of Contributions:</label>
+        <input type="number" name="contributions" class="w-full border rounded px-3 py-2">
+      </div>
+      <div class="mb-4">
+        <label class="block mb-1 text-white">Month:</label>
+        <select name="month" class="w-full border rounded px-3 py-2">
+          <option value="January">January</option>
+          <option value="February">February</option>
+          <option value="March">March</option>
+          <option value="April">April</option>
+          <option value="May">May</option>
+          <option value="June">June</option>
+          <option value="July">July</option>
+          <option value="August">August</option>
+          <option value="September">September</option>
+          <option value="October">October</option>
+          <option value="November">November</option>
+          <option value="December">December</option>
+        </select>
+      </div>
+      <div id="additionalFields" class="mb-4"></div>
+      <button type="button" id="addFieldsBtn" class="btn px-4 py-2 rounded hover:bg-red-700">Next >>> </button>
+      <button type="submit" class="mt-4 btn px-4 py-2 rounded hover:bg-red-700">Submit</button>
+    </form>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('dynamicForm');
+      const additionalFieldsContainer = document.getElementById('additionalFields');
+      const addFieldsBtn = document.getElementById('addFieldsBtn');
+  
+      addFieldsBtn.addEventListener('click', function() {
+        const numContributions = parseInt(form.elements['contributions'].value);
+        for (let i = 0; i < numContributions; i++) {
+          const fieldsGroup = document.createElement('div');
+          fieldsGroup.className = 'mb-4';
+  
+          const taskInput = document.createElement('input');
+          taskInput.type = 'text';
+          taskInput.name = 'task[]';
+          taskInput.placeholder = 'Task';
+          taskInput.className = 'w-full border rounded px-3 py-2';
+          fieldsGroup.appendChild(taskInput);
+  
+          const impactInput = document.createElement('input');
+          impactInput.type = 'text';
+          impactInput.name = 'impact[]';
+          impactInput.placeholder = 'Impact';
+          impactInput.className = 'w-full border rounded px-3 py-2';
+          fieldsGroup.appendChild(impactInput);
+  
+          const sourceInput = document.createElement('input');
+          sourceInput.type = 'text';
+          sourceInput.name = 'source[]';
+          sourceInput.placeholder = 'Source (Link)';
+          sourceInput.className = 'w-full border rounded px-3 py-2';
+          fieldsGroup.appendChild(sourceInput);
+  
+          additionalFieldsContainer.appendChild(fieldsGroup);
+        }
+      });
+  
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(form);
+        const name = formData.get('name');
+        const nxtid = formData.get('nxtid');
+        const contributions = formData.get('contributions');
+        const month = formData.get('month');
+        const tasks = formData.getAll('task[]');
+        const impacts = formData.getAll('impact[]');
+        const sources = formData.getAll('source[]');
+  
+        // Construct an array of objects where each object represents a row in the Google Sheet
+        const rows = tasks.map((task, index) => ({
+          name: index === 0 ? name : '', // Add name only for the first row
+          nxtid: index === 0 ? nxtid : '', // Add NXTID only for the first row
+          contributions: index === 0 ? contributions : '', // Add contributions only for the first row
+          month: index === 0 ? month : '', // Add month only for the first row
+          task: task,
+          impact: impacts[index],
+          source: sources[index]
+        }));
+  
+        // Send a separate request for each task set to add them as new rows
+        Promise.all(rows.map(row =>
+          fetch('https://sheetdb.io/api/v1/j2kgcqdwyi1v8', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data: row }),
+          })
+        ))
+        .then(responses => {
+          if (!responses.every(response => response.ok)) {
+            throw new Error('One or more requests failed');
+          }
+          return Promise.all(responses.map(response => response.json()));
+        })
+        .then(data => {
+          console.log('Success:', data);
+          alert('Data submitted successfully.');
+          form.reset();
+          additionalFieldsContainer.innerHTML = ''; // Reset additional fields
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          alert('There was an error submitting your data. Please try again.');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
