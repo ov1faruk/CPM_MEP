@@ -78,15 +78,15 @@
     <form id="dynamicForm">
       <div class="mb-4">
         <label class="block mb-1 text-white">Name:</label>
-        <input type="text" name="name" class="w-full border rounded px-3 py-2">
+        <input type="text" name="name" class="w-full border rounded px-3 py-2" required>
       </div>
       <div class="mb-4">
         <label class="block mb-1 text-white">NXTID:</label>
-        <input type="text" name="nxtid" class="w-full border rounded px-3 py-2">
+        <input type="text" name="nxtid" class="w-full border rounded px-3 py-2" required>
       </div>
       <div class="mb-4">
         <label class="block mb-1 text-white">Number of Contributions:</label>
-        <input type="number" name="contributions" class="w-full border rounded px-3 py-2">
+        <input type="number" name="contributions" class="w-full border rounded px-3 py-2" required>
       </div>
       <div class="mb-4">
         <label class="block mb-1 text-white">Month:</label>
@@ -157,6 +157,12 @@
         const tasks = formData.getAll('task[]');
         const impacts = formData.getAll('impact[]');
         const sources = formData.getAll('source[]');
+  
+        // Check if required fields are filled
+        if (!name || !nxtid || !contributions) {
+          alert('Please fill out all required fields.');
+          return;
+        }
   
         // Construct an array of objects where each object represents a row in the Google Sheet
         const rows = tasks.map((task, index) => ({
