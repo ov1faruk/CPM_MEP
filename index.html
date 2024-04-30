@@ -130,11 +130,11 @@
       taskInput.className = 'text-black w-full border rounded px-3 py-2';
       fieldsGroup.appendChild(taskInput);
   
-      const impactInput = document.createElement('input');
-      impactInput.type = 'text';
+     const impactInput = document.createElement('textarea');
       impactInput.name = 'impacts';
       impactInput.placeholder = 'Impact';
       impactInput.className = 'text-black w-full border rounded px-3 py-2';
+      impactInput.rows = '4'; // Set the number of rows to define its height, adjust as needed
       fieldsGroup.appendChild(impactInput);
   
       const sourceInput = document.createElement('input');
