@@ -92,6 +92,14 @@
     const nxtidInput = document.getElementById('nxtid');
     const contributionsInput = document.getElementById('contributions');
     const monthSelect = document.getElementById('month');
+
+    // Prevent form submission on Enter key press except in textarea
+form.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' && event.target.tagName !== 'TEXTAREA') {
+      event.preventDefault();
+      return false;
+    }
+  });
   
     function enableNextButton() {
       // Enable the 'Next' button only if all required fields are filled out
